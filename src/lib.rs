@@ -1,6 +1,6 @@
 /// A hard result contains a hard error in its [Err] variant, and a [SoftResult] in its [Ok] variant.
 /// A hard error is a catastrophic failure, that should be avoided at all costs.
-pub type HardResult<T, SoftError, HardError> = Result<SoftResult<T, SoftError>, HardError>;
+pub type MalleableResult<T, SoftError, HardError> = Result<SoftResult<T, SoftError>, HardError>;
 
 /// A [SoftResult], should only contain errors if these errors are benign, and can be presented to the user as a valid response.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -47,16 +47,18 @@ mod tests {
 
     #[instrument(err)]
     fn tries_hard(
-        hard_result: HardResult<(), SoftError, HardError>,
+        hard_result: MalleableResult<(), SoftError, HardError>,
         has_skipped: &mut bool,
-    ) -> HardResult<(), SoftError, HardError> {
+    ) -> MalleableResult<(), SoftError, HardError> {
         let x = try_hard!(hard_result);
         *has_skipped = false;
         Ok(SoftResult::Ok(x))
     }
 
     #[instrument(err)]
-    fn tries_soft(soft_result: SoftResult<(), SoftError>) -> HardResult<(), SoftError, HardError> {
+    fn tries_soft(
+        soft_result: SoftResult<(), SoftError>,
+    ) -> MalleableResult<(), SoftError, HardError> {
         Ok(SoftResult::Ok(try_soft!(soft_result)))
     }
 
@@ -65,7 +67,7 @@ mod tests {
     #[case(Ok(SoftResult::SoftErr(SoftError)), true)]
     #[case(Err(HardError), true)]
     fn check_try_hard(
-        #[case] hard_result: HardResult<(), SoftError, HardError>,
+        #[case] hard_result: MalleableResult<(), SoftError, HardError>,
         #[case] expected_skip: bool,
     ) {
         tracing_subscriber::fmt::try_init().ok();
