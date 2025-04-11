@@ -46,8 +46,11 @@ mod tests {
     #[instrument(err)]
     fn tries_hard(
         hard_result: HardResult<(), SoftError, HardError>,
+        has_skipped: &mut bool,
     ) -> HardResult<(), SoftError, HardError> {
-        Ok(SoftResult::Ok(try_hard!(hard_result)))
+        let x = try_hard!(hard_result);
+        *has_skipped = false;
+        Ok(SoftResult::Ok(x))
     }
 
     #[instrument(err)]
@@ -56,18 +59,27 @@ mod tests {
     }
 
     #[rstest]
-    #[case(Ok(SoftResult::Ok(())))]
-    #[case(Ok(SoftResult::SoftErr(SoftError)))]
-    #[case(Err(HardError))]
-    fn check_try_hard(#[case] hard_result: HardResult<(), SoftError, HardError>) {
-        let result = tries_hard(hard_result.clone());
-        assert_eq!(result, hard_result)
+    #[case(Ok(SoftResult::Ok(())), false)]
+    #[case(Ok(SoftResult::SoftErr(SoftError)), true)]
+    #[case(Err(HardError), true)]
+    fn check_try_hard(
+        #[case] hard_result: HardResult<(), SoftError, HardError>,
+        #[case] expected_skip: bool,
+    ) {
+        tracing_subscriber::fmt::try_init().ok();
+
+        let mut has_skipped = true;
+        let result = tries_hard(hard_result.clone(), &mut has_skipped);
+        assert_eq!(result, hard_result);
+        assert_eq!(has_skipped, expected_skip);
     }
 
     #[rstest]
     #[case(SoftResult::Ok(()))]
     #[case(SoftResult::SoftErr(SoftError))]
     fn check_try_soft(#[case] soft_result: SoftResult<(), SoftError>) {
+        tracing_subscriber::fmt::try_init().ok();
+
         let result = tries_soft(soft_result.clone());
         assert_eq!(result, Ok(soft_result))
     }
