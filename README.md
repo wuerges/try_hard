@@ -1,1 +1,1 @@
-Look at the docs in docs.rs!
+Look at <https://docs.rs/try_hard/> in docs.rs!
