@@ -8,7 +8,7 @@ pub type MalleableResult<T, SoftError, HardError> = Result<SoftResult<T, SoftErr
 pub enum SoftResult<T, E> {
     /// The Ok variant should be used like the core result [Ok].
     Ok(T),
-    /// The [SoftErr] variant should be reserved to soft errors.
+    /// The [SoftResult::SoftErr] variant should be reserved to soft errors.
     /// These are benign errors that can be returned to the user, such as a 404 in a web application.
     SoftErr(E),
 }
