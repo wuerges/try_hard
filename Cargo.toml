@@ -2,6 +2,12 @@
 name = "try_hard"
 version = "0.1.0"
 edition = "2024"
+description = """
+Malleable error handling for rust.
+"""
+license = "MIT"
+repository = "https://github.com/wuerges/try_hard.git"
+authors = ["Emilio Wuerges <wuerges@gmail.com>"]
 
 [dependencies]
 
