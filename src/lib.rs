@@ -6,11 +6,16 @@ pub type MalleableResult<T, SoftError, HardError> = Result<SoftResult<T, SoftErr
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[must_use]
 pub enum SoftResult<T, E> {
+    /// The Ok variant should be used like the core result [Ok].
     Ok(T),
+    /// The [SoftErr] variant should be reserved to soft errors.
+    /// These are benign errors that can be returned to the user, such as a 404 in a web application.
     SoftErr(E),
 }
 
 #[macro_export]
+/// The `try_soft` macro does the job of the `?` operator: extract the [SoftResult::Ok] Value, without short-circuiting.
+/// It will short-circuit in case of a [SoftResult::SoftErr], returning a `MalleableResult::Ok(SoftResult::SoftErr(_))`.
 macro_rules! try_soft {
     ($e:expr) => {
         match $e {
@@ -21,6 +26,10 @@ macro_rules! try_soft {
 }
 
 #[macro_export]
+/// The `try_soft` macro does the job of the `?` operator: extract the [SoftResult::Ok] Value, without short-circuiting.
+/// It will short-circuit case or errors:
+/// - In case of [SoftResult::SoftErr], returning a `MalleableResult::Ok(SoftResult::SoftErr(_))`.
+/// - In case of [MalleableResult]::Err, returning a `MalleableResult::Err(_)`.
 macro_rules! try_hard {
     ($e:expr) => {
         match $e {
