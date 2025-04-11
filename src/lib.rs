@@ -13,6 +13,58 @@
 //!     Hard errors must be monitored.
 //!     Hard errors will result in `error` events when used with the `#[instrument(err)]` `tracing macro.`
 //!
+//!
+//! # How can I use it?
+//!
+//! ```rust
+//! use tracing::instrument;
+//! use try_hard::*;
+//!
+//! struct ValidName(String);
+//!
+//! struct User {
+//!     id: u64,
+//!     name: ValidName,
+//! }
+//!
+//! #[derive(Debug, thiserror::Error)]
+//! #[error("scary database failure")]
+//! struct DatabaseFailure;
+//!
+//! #[derive(Debug)]
+//! struct InvalidNameError(String);
+//!
+//! fn fetch_user(name: &ValidName) -> Result<User, DatabaseFailure> {
+//!    todo!()
+//! }
+//!
+//! #[instrument]
+//! fn validate_name(name: &str) -> SoftResult<ValidName, InvalidNameError> {
+//!     if name.contains("💩") {
+//!         return SoftResult::SoftErr(InvalidNameError("name contains 💩 emoji".to_string()))
+//!     }
+//!     SoftResult::Ok(ValidName(name.to_string()))
+//! }
+//!
+//! #[instrument(err)]
+//! fn locate_user_in_db(name: &str) -> MalleableResult<User, InvalidNameError, DatabaseFailure> {
+//!     let valid_name = try_soft!(validate_name(name));
+//!     let user = fetch_user(&valid_name)?;
+//!     Ok(SoftResult::Ok(user))
+//! }
+//!
+//! #[instrument(err)]
+//! fn inside_your_application(
+//!     name: &str
+//! ) -> MalleableResult<User, InvalidNameError, DatabaseFailure> {
+//!     let user = try_hard!(locate_user_in_db(name));
+//!     Ok(SoftResult::Ok(user))
+//! }
+//!
+//!
+//! ```
+//!
+//!
 
 /// A hard result contains a hard error in its [Err] variant, and a [SoftResult] in its [Ok] variant.
 /// A hard error is a catastrophic failure, that should be avoided at all costs.
