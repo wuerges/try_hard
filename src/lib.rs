@@ -1,3 +1,19 @@
+//! Provides the [MalleableResult] and [SoftResult] types, and the [try_hard] and [try_soft] macros.
+//! Support the `tracing` crate!
+//!
+//! A [MalleableResult] distinguishes errors in two categories:
+//! - Soft errors:
+//!     These are "benign" error types that shouldn't cause your application to stop.
+//!     Think of 404 errors, or any other error that was caused by the user, and not by your application.
+//!     Soft errors won't trigger `error` events when used with the `#[instrument(err)]` `tracing` macro.
+//!
+//! - Hard errors:
+//!     These are bad.
+//!     Hard errors are in general not fault of the user, and the user is hopeless without our intervention.
+//!     Hard errors must be monitored.
+//!     Hard errors will result in `error` events when used with the `#[instrument(err)]` `tracing macro.`
+//!
+
 /// A hard result contains a hard error in its [Err] variant, and a [SoftResult] in its [Ok] variant.
 /// A hard error is a catastrophic failure, that should be avoided at all costs.
 pub type MalleableResult<T, SoftError, HardError> = Result<SoftResult<T, SoftError>, HardError>;
