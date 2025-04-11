@@ -10,6 +10,7 @@ pub enum SoftResult<T, E> {
     SoftErr(E),
 }
 
+#[macro_export]
 macro_rules! try_soft {
     ($e:expr) => {
         match $e {
@@ -19,6 +20,7 @@ macro_rules! try_soft {
     };
 }
 
+#[macro_export]
 macro_rules! try_hard {
     ($e:expr) => {
         match $e {
